@@ -5,6 +5,10 @@ import random
 import time
 import sys
 
+from time import sleep
+import serial
+# ser = serial.Serial('/dev/ttyACM0', 9600) # Puerto si se uusa en Raspberry
+ser = serial.Serial('/dev/cu.usbmodem1411', 9600) # Establish the connection on a specific port
 # Using the Python Device SDK for IoT Hub:
 #   https://github.com/Azure/azure-iot-sdk-python
 # The sample connects to a device-specific MQTT endpoint on your IoT Hub.
@@ -43,20 +47,13 @@ def iothub_client_telemetry_sample_run():
 
         while True:
             # Build the message with simulated telemetry values.
-            temperature = TEMPERATURE + (random.random() * 15)
-            humidity = HUMIDITY + (random.random() * 20)
-            msg_txt_formatted = MSG_TXT % (temperature, humidity)
-            message = IoTHubMessage(msg_txt_formatted)
 
-            # Add a custom application property to the message.
-            # An IoT hub can filter on these properties without access to the message body.
-            prop_map = message.properties()
-            if temperature > 30:
-              prop_map.add("temperatureAlert", "true")
-            else:
-              prop_map.add("temperatureAlert", "false")
+            a = ser.readline() # Read the newest output from the Arduino
 
-            # Send the message.
+            message = IoTHubMessage(a)
+
+
+
             print( "Sending message: %s" % message.get_string() )
             client.send_event_async(message, send_confirmation_callback, None)
             time.sleep(1)
